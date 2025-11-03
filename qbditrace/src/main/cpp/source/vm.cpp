@@ -123,7 +123,8 @@ dealCallEvent(QBDI::VM *vm, const QBDI::VMState *vmState, QBDI::GPRState *gprSta
         int flags = (int)x3;
         int fd = (int)x4;
         uint64_t offset = x5;
-        logtext = fmt::format("{:>{}}{}{}\n", " ", logData->suojinNum * 4,
+        retFuncName = "mmap";
+        logtext = fmt::format("{:>{}}{}{}", " ", logData->suojinNum * 4,
                               get_prefix_by_address(gprState->pc), parse_mmap(addr, length, prot, flags, fd, offset));
     }else if(funcName == "munmap") {
         uint64_t addr = x0;
@@ -229,6 +230,10 @@ dealCallEvent(QBDI::VM *vm, const QBDI::VMState *vmState, QBDI::GPRState *gprSta
         const char* symbol = reinterpret_cast<const char *>(x1);
         logtext = fmt::format("{:>{}}{}{}\n", " ", logData->suojinNum * 4,
                               get_prefix_by_address(gprState->pc), parse_dlsym(handle, symbol));
+    }else if(funcName == "dlclose"){
+        uint64_t handle = x0;
+        logtext = fmt::format("{:>{}}{}dlclose({:#x})\n", " ", logData->suojinNum * 4,
+                              get_prefix_by_address(gprState->pc), handle);
     }else if(funcName == "__system_property_get"){
         const char* name = reinterpret_cast<const char *>(x0);
         uint64_t value = x1;
@@ -271,6 +276,9 @@ dealReturnEvent(QBDI::VM *vm, const QBDI::VMState *vmState, QBDI::GPRState *gprS
         uint64_t result = x0;
         logtext = fmt::format("->{:#x}\n",  result);
     }else if(retFuncName == "calloc"){
+        uint64_t result = x0;
+        logtext = fmt::format("->{:#x}\n", result);
+    }else if(retFuncName == "mmap") {
         uint64_t result = x0;
         logtext = fmt::format("->{:#x}\n", result);
     }else if(retFuncName == "dlopen") {

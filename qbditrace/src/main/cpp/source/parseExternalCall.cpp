@@ -39,7 +39,7 @@ std::string parse_munmap(uint64_t addr, size_t len) {
 
 std::string parse_memset(uint64_t ptr, int value, size_t num) {
     std::string logtext;
-    logtext = fmt::format("memset({:#x},{},{:#x})", ptr, value, num);
+    logtext = fmt::format("memset({:#x},{:#x},{:#x})", ptr, value, num);
     return logtext;
 }
 

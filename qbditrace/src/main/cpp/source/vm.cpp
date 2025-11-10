@@ -2,10 +2,10 @@
 #include <stack>
 extern QBDI::rword thisModuleStart;
 static std::stack<QBDI::rword> retaddrStack;
-static std::string retFuncName = "";
-static uint64_t parameter1 = 0;
-static uint64_t parameter2 = 0;
-static uint64_t parameter3 = 0;
+std::string retFuncName = "";
+uint64_t parameter1 = 0;
+uint64_t parameter2 = 0;
+uint64_t parameter3 = 0;
 QBDI::VMAction // deal with BL
 dealPostInstruction(QBDI::VM *vm, QBDI::GPRState *gprState, QBDI::FPRState *fprState, void *data) {
     const QBDI::InstAnalysis *instAnalysis = vm->getInstAnalysis();
@@ -63,17 +63,39 @@ dealSVCPreInstruction(QBDI::VM *vm, QBDI::GPRState *gprState, QBDI::FPRState *fp
     uint64_t arg4 = gprState->x3;
     uint64_t arg5 = gprState->x4;
     uint64_t arg6 = gprState->x5;
-    logtext = fmt::format("{:>{}}{}SVC: {}\n", " ", logData->suojinNum * 4,
+    logtext = fmt::format("{:>{}}{}SVC: {}", " ", logData->suojinNum * 4,
                           get_prefix_by_address(gprState->pc) ,dealSyscall(SVCNumber, arg1, arg2, arg3, arg4, arg5, arg6));
     logData->logPrint(logtext.c_str());
-    logData->suojinNum++;
+//    logData->suojinNum++;
     return QBDI::VMAction::CONTINUE;
 }
 
 QBDI::VMAction
 dealSVCPostInstruction(QBDI::VM *vm, QBDI::GPRState *gprState, QBDI::FPRState *fprState, void *data) {
-
-
+    auto* logData = reinterpret_cast<logManager *>(data);
+    uint64_t x0 = gprState->x0;
+    std::string logtext;
+    if(retFuncName == "") {
+        return QBDI::VMAction::CONTINUE;
+    }else if(retFuncName == "mmap") {
+        uint64_t result = x0;
+        logtext = fmt::format("->{:#x}\n", result);
+    }else if(retFuncName == "read"){
+        uint64_t result = x0;
+        char* buf = reinterpret_cast<char *>(parameter2);
+        if(result > 32){ //读取到了数据，但是字符串太长了，就不打印字符串了
+            logtext = fmt::format("->len{:#x}\n", result);
+        }else if(result > 0){ //长度较短，可以打印
+            logtext = fmt::format("->{} len{:#x}\n", buf, result);
+        }else{
+            logtext = fmt::format("->error read\n");
+        }
+    }
+    retFuncName = "";
+    parameter1 = 0;
+    parameter2 = 0;
+    parameter3 = 0;
+    logData->logPrint(logtext.c_str());
     return QBDI::VMAction::CONTINUE;
 }
 
@@ -281,6 +303,16 @@ dealReturnEvent(QBDI::VM *vm, const QBDI::VMState *vmState, QBDI::GPRState *gprS
     }else if(retFuncName == "mmap") {
         uint64_t result = x0;
         logtext = fmt::format("->{:#x}\n", result);
+    }else if(retFuncName == "read") {
+        uint64_t result = x0;
+        char* buf = reinterpret_cast<char *>(parameter2);
+        if(result > 32){ //读取到了数据，但是字符串太长了，就不打印字符串了
+            logtext = fmt::format("->len{:#x}\n", result);
+        }else if(result > 0){ //长度较短，可以打印
+            logtext = fmt::format("->{} len{:#x}\n", buf, result);
+        }else{
+            logtext = fmt::format("->error read\n");
+        }
     }else if(retFuncName == "dlopen") {
         uint64_t result = x0;
         logtext = fmt::format("->{:#x}\n", result);

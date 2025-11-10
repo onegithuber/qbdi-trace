@@ -181,3 +181,58 @@ std::string parse_sysconf(int name){
     logtext = fmt::format("sysconf({})", name);
     return logtext;
 }
+
+std::string parse_read(int fd, uint64_t buf, size_t count){
+    std::string logtext;
+    char buf_[512] = {0};
+    if(get_filename_by_fd(fd, buf_, sizeof(buf_)) == 0){ //成功从fd中获取到了文件名
+        logtext = fmt::format("read({},{:#x},{:#x})", buf_, buf, count);
+    }else{ //没有获取到文件名
+        logtext = fmt::format("read({:#x},{:#x},{:#x})", fd, buf, count);
+    }
+    return logtext;
+}
+
+std::string parse_fstat(int fd, uint64_t statbuf){
+    std::string logtext;
+    char buf_[512] = {0};
+    if(get_filename_by_fd(fd, buf_, sizeof(buf_)) == 0){ //成功从fd中获取到了文件名
+        logtext = fmt::format("fstat({},{:#x})", buf_, statbuf);
+    }else{ //没有获取到文件名
+        logtext = fmt::format("fstat({:#x},{:#x})", fd, statbuf);
+    }
+    return logtext;
+}
+
+std::string parse_lseek(int fd, uint64_t offset, int whence){
+    std::string logtext;
+    char buf_[512] = {0};
+    if(get_filename_by_fd(fd, buf_, sizeof(buf_)) == 0){ //成功从fd中获取到了文件名
+        logtext = fmt::format("lseek({},{:#x},{})", buf_, offset, whence);
+    }else{ //没有获取到文件名
+        logtext = fmt::format("lseek({:#x},{:#x},{})", fd, offset, whence);
+    }
+    return logtext;
+}
+
+std::string parse_faccessat(int fd, const char *path, int amode, int flag){
+    std::string logtext;
+    char buf_[512] = {0};
+    if(get_filename_by_fd(fd, buf_, sizeof(buf_)) == 0){ //成功从fd中获取到了文件名
+        logtext = fmt::format("faccessat({},{},{},{})", buf_, path, amode, flag);
+    }else{ //没有获取到文件名
+        logtext = fmt::format("faccessat({:#x},{},{},{})", fd, path, amode, flag);
+    }
+    return logtext;
+}
+
+std::string parse_newfstatat(int dirfd, const char *pathname, uint64_t statbuf, int flags){
+    std::string logtext;
+    char buf_[512] = {0};
+    if(get_filename_by_fd(dirfd, buf_, sizeof(buf_)) == 0){ //成功从fd中获取到了文件名
+        logtext = fmt::format("newfstatat({},{},{:#x},{})", buf_, pathname, statbuf, flags);
+    }else{ //没有获取到文件名
+        logtext = fmt::format("newfstatat({:#x},{},{:#x},{})", dirfd, pathname, statbuf, flags);
+    }
+    return logtext;
+}

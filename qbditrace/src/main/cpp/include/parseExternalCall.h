@@ -38,4 +38,6 @@ std::string parse_fstat(int fd, uint64_t statbuf);
 std::string parse_lseek(int fd, uint64_t offset, int whence);
 std::string parse_faccessat(int fd, const char *path, int amode, int flag);
 std::string parse_newfstatat(int dirfd, const char *pathname, uint64_t statbuf, int flags);
+std::string parse_opendir(const char* name);
+std::string parse_readdir(uint64_t dirp);
 #endif //QBDI_DEMO_PARSEEXTERNALCALL_H

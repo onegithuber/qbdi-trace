@@ -122,7 +122,7 @@ void parse_Symbol_from_Memory(QBDI::rword address){
 std::string get_prefix_by_address(QBDI::rword address){
     std::string prefix;
     for(const auto& [moduleID, info] : moduleInfoCache) {
-        if (address >= info.exeStart && address < info.exeEnd) { //如果地址在这个so的范围内,则开始解析该so的符号
+        if (address >= info.base && address < info.exeEnd) { //如果地址在这个so的范围内,则开始解析该so的符号
             std::string name = moduleID.substr(0, moduleID.find('_'));
             prefix = fmt::format("[{}!{:#x}]", name, address - info.base);
             return prefix;
@@ -136,7 +136,7 @@ void initModuleStart(std::string moduleName){
     for(const auto& [moduleID, info] : moduleInfoCache) {
         if(moduleID.starts_with(moduleName)) {
             thisModuleStart = info.base;
-            LOGI("this module %s start at %#lx", moduleName.c_str(), thisModuleStart);
+            LOGI("this module %s start at %#lx, exeStart: %#lx, exeEnd: %#lx", moduleName.c_str(), thisModuleStart, info.exeStart, info.exeEnd);
             return;
         }
     }

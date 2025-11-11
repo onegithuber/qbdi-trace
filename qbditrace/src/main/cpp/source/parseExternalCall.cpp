@@ -236,3 +236,15 @@ std::string parse_newfstatat(int dirfd, const char *pathname, uint64_t statbuf, 
     }
     return logtext;
 }
+
+std::string parse_opendir(const char* name){
+    std::string logtext;
+    logtext = fmt::format("opendir({})", name);
+    return logtext;
+}
+
+std::string parse_readdir(uint64_t dirp){
+    std::string logtext;
+    logtext = fmt::format("readdir({:#x})", dirp);
+    return logtext;
+}

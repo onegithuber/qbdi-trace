@@ -241,6 +241,15 @@ dealCallEvent(QBDI::VM *vm, const QBDI::VMState *vmState, QBDI::GPRState *gprSta
         uint64_t mode = x3;
         logtext = fmt::format("{:>{}}{}{}\n", " ", logData->suojinNum * 4,
                               get_prefix_by_address(gprState->pc), parse_openat(fd, pathname, flags, mode));
+    }else if(funcName == "opendir"){
+        const char* name = reinterpret_cast<const char *>(x0);
+        retFuncName = funcName;
+        logtext = fmt::format("{:>{}}{}{}", " ", logData->suojinNum * 4,
+                              get_prefix_by_address(gprState->pc), parse_opendir(name));
+    }else if(funcName == "readdir"){
+        uint64_t dirp = x0;
+        logtext = fmt::format("{:>{}}{}{}\n", " ", logData->suojinNum * 4,
+                              get_prefix_by_address(gprState->pc), parse_readdir(dirp));
     }else if(funcName == "dlopen"){
         const char* path = reinterpret_cast<const char *>(x0);
         int flag = (int)x1;
@@ -313,6 +322,9 @@ dealReturnEvent(QBDI::VM *vm, const QBDI::VMState *vmState, QBDI::GPRState *gprS
         }else{
             logtext = fmt::format("->error read\n");
         }
+    }else if(retFuncName == "opendir") {
+        uint64_t result = x0;
+        logtext = fmt::format("->{:#x}\n", result);
     }else if(retFuncName == "dlopen") {
         uint64_t result = x0;
         logtext = fmt::format("->{:#x}\n", result);
